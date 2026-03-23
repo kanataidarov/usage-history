@@ -208,7 +208,7 @@ private fun SessionTimeline(
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             itemsIndexed(sessions, key = { _, item -> item.id }) { index, session ->
                 TimelineSessionRow(
@@ -236,13 +236,13 @@ private fun TimelineSessionRow(
         modifier = Modifier
             .fillMaxWidth()
             .background(Color.Transparent)
-            .padding(bottom = 4.dp),
+            .padding(bottom = 2.dp),
         verticalAlignment = Alignment.Top,
     ) {
         Column(
             modifier = Modifier
                 .width(72.dp)
-                .padding(top = 18.dp),
+                .padding(top = 14.dp),
             horizontalAlignment = Alignment.End,
         ) {
             Text(
@@ -256,12 +256,12 @@ private fun TimelineSessionRow(
         Card(
             modifier = Modifier
                 .weight(1f)
-                .padding(start = 4.dp),
+                .padding(start = 2.dp),
             shape = RoundedCornerShape(28.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         ) {
             Row(
-                modifier = Modifier.padding(16.dp),
+                modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 AppIcon(
@@ -271,13 +271,13 @@ private fun TimelineSessionRow(
                 Column(
                     modifier = Modifier
                         .weight(1f)
-                        .padding(start = 16.dp),
+                        .padding(start = 12.dp),
                 ) {
                     Text(
                         text = session.appLabel,
                         style = MaterialTheme.typography.titleMedium,
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(2.dp))
                     Text(
                         text = formatDuration(session.durationMillis),
                         style = MaterialTheme.typography.bodyLarge,
@@ -293,19 +293,19 @@ private fun TimelineSessionRow(
 private fun TimelineMarker(showConnector: Boolean) {
     Column(
         modifier = Modifier
-            .padding(horizontal = 12.dp),
+            .padding(horizontal = 10.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Surface(
-            modifier = Modifier.size(44.dp),
+            modifier = Modifier.size(38.dp),
             shape = CircleShape,
             color = Color.White,
             shadowElevation = 6.dp,
         ) {
-            Canvas(modifier = Modifier.padding(8.dp)) {
+            Canvas(modifier = Modifier.padding(7.dp)) {
                 drawCircle(
                     color = TimelineAccent,
-                    style = Stroke(width = 8f),
+                    style = Stroke(width = 7f),
                 )
             }
         }
@@ -313,7 +313,7 @@ private fun TimelineMarker(showConnector: Boolean) {
             Box(
                 modifier = Modifier
                     .width(4.dp)
-                    .height(88.dp)
+                    .height(68.dp)
                     .background(TimelineAccent),
             )
         }
@@ -330,7 +330,7 @@ private fun AppIcon(
     val drawable = remember(packageName) { resolver.resolveIcon(packageName) }
 
     Surface(
-        modifier = Modifier.size(56.dp),
+        modifier = Modifier.size(52.dp),
         shape = CircleShape,
         tonalElevation = 2.dp,
     ) {

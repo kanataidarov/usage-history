@@ -24,6 +24,7 @@ class UsageHistoryRepository(
             queryEndMillis = endMillis.coerceAtMost(System.currentTimeMillis()),
             ignoredPackages = setOf(context.packageName),
         )
+            .filter { session -> packageMetadataResolver.shouldTrackInTimeline(session.packageName) }
 
         val entities = sessions.map { session ->
             val appLabel = packageMetadataResolver.resolveLabel(session.packageName)
