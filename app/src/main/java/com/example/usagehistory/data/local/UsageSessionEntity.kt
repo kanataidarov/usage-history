@@ -20,4 +20,15 @@ data class UsageSessionEntity(
     val endedAtEpochMillis: Long,
     val durationMillis: Long,
     val dayStartEpochMillis: Long,
-)
+    val sessionSource: String = SESSION_SOURCE_USAGE_STATS,
+    val contentType: String = CONTENT_TYPE_APP,
+    val contentTitle: String? = null,
+) {
+    companion object {
+        const val SESSION_SOURCE_USAGE_STATS = "usage_stats"
+        const val SESSION_SOURCE_MEDIA_SESSION = "media_session"
+
+        const val CONTENT_TYPE_APP = "app"
+        const val CONTENT_TYPE_YOUTUBE_VIDEO = "youtube_video"
+    }
+}

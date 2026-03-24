@@ -26,6 +26,8 @@ import com.example.usagehistory.ui.theme.PermissionBackground
 fun UsageAccessScreen(
     isChecking: Boolean,
     onGrantAccessClick: () -> Unit,
+    hasNotificationAccess: Boolean,
+    onGrantNotificationAccessClick: () -> Unit,
     onRefreshClick: () -> Unit,
 ) {
     Box(
@@ -59,6 +61,15 @@ fun UsageAccessScreen(
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+                Text(
+                    text = if (hasNotificationAccess) {
+                        "YouTube video detail tracking is enabled."
+                    } else {
+                        "Optional: enable Notification Access to replace generic YouTube app opens with video titles and exact watch-session times going forward."
+                    },
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
 
                 Button(
                     modifier = Modifier.fillMaxWidth(),
@@ -72,6 +83,13 @@ fun UsageAccessScreen(
                     onClick = onRefreshClick,
                 ) {
                     Text("I already enabled it")
+                }
+
+                Button(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = onGrantNotificationAccessClick,
+                ) {
+                    Text(if (hasNotificationAccess) "Notification access enabled" else "Enable YouTube detail tracking")
                 }
 
                 if (isChecking) {

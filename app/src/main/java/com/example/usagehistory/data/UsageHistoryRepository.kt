@@ -18,13 +18,29 @@ class UsageHistoryRepository(
         val startMillis = date.atStartOfDay(zoneId).toInstant().toEpochMilli()
         val endMillis = date.plusDays(1).atStartOfDay(zoneId).toInstant().toEpochMilli()
         val dayKey = startMillis
+        val usageSessionDao = database.usageSessionDao()
+        val detailedYoutubeSessions =
+            usageSessionDao.getSessionsForDayAndSource(
+                dayStartEpochMillis = dayKey,
+                sessionSource = UsageSessionEntity.SESSION_SOURCE_MEDIA_SESSION,
+                packageName = YoutubeSessionTracker.YOUTUBE_PACKAGE,
+            )
 
         val sessions = sessionBuilder.build(
             transitions = usageEventReader.readTransitions(startMillis, endMillis),
             queryEndMillis = endMillis.coerceAtMost(System.currentTimeMillis()),
             ignoredPackages = setOf(context.packageName),
         )
-            .filter { session -> packageMetadataResolver.shouldTrackInTimeline(session.packageName) }
+            .filter { session ->
+                packageMetadataResolver.shouldTrackInTimeline(session.packageName) &&
+                    !(
+                        session.packageName == YoutubeSessionTracker.YOUTUBE_PACKAGE &&
+                            detailedYoutubeSessions.any { detailed ->
+                                session.startedAtEpochMillis < detailed.endedAtEpochMillis &&
+                                    session.endedAtEpochMillis > detailed.startedAtEpochMillis
+                            }
+                    )
+            }
 
         val entities = sessions.map { session ->
             val appLabel = packageMetadataResolver.resolveLabel(session.packageName)
@@ -36,11 +52,17 @@ class UsageHistoryRepository(
                 endedAtEpochMillis = session.endedAtEpochMillis,
                 durationMillis = session.durationMillis,
                 dayStartEpochMillis = dayKey,
+                sessionSource = UsageSessionEntity.SESSION_SOURCE_USAGE_STATS,
+                contentType = UsageSessionEntity.CONTENT_TYPE_APP,
             )
         }
 
-        database.usageSessionDao().replaceDay(dayKey, entities)
-        return database.usageSessionDao().getSessionsForDay(dayKey)
+        usageSessionDao.replaceDayForSource(
+            dayStartEpochMillis = dayKey,
+            sessionSource = UsageSessionEntity.SESSION_SOURCE_USAGE_STATS,
+            sessions = entities,
+        )
+        return usageSessionDao.getSessionsForDay(dayKey)
     }
 
     suspend fun loadCachedDay(date: LocalDate): List<UsageSessionEntity> {
@@ -49,4 +71,6 @@ class UsageHistoryRepository(
     }
 
     fun hasUsageAccess(): Boolean = UsageAccessManager.hasUsageAccess(context)
+
+    fun hasNotificationAccess(): Boolean = NotificationAccessManager.hasNotificationAccess(context)
 }

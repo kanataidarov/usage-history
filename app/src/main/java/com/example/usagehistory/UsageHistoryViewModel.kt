@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.example.usagehistory.data.NotificationAccessManager
 import com.example.usagehistory.data.UsageAccessManager
 import com.example.usagehistory.data.UsageHistoryRepository
 import com.example.usagehistory.data.local.UsageSessionEntity
@@ -18,6 +19,7 @@ data class TimelineUiState(
     val selectedDate: LocalDate = LocalDate.now(),
     val sessions: List<UsageSessionEntity> = emptyList(),
     val hasUsageAccess: Boolean = false,
+    val hasNotificationAccess: Boolean = false,
     val isRefreshing: Boolean = false,
     val errorMessage: String? = null,
 )
@@ -30,8 +32,12 @@ class UsageHistoryViewModel(
 
     fun onResume() {
         val hasAccess = repository.hasUsageAccess()
+        val hasNotificationAccess = repository.hasNotificationAccess()
         _state.update { current ->
-            current.copy(hasUsageAccess = hasAccess)
+            current.copy(
+                hasUsageAccess = hasAccess,
+                hasNotificationAccess = hasNotificationAccess,
+            )
         }
         if (hasAccess) {
             refreshCurrentDay()
@@ -56,6 +62,10 @@ class UsageHistoryViewModel(
         UsageAccessManager.openUsageAccessSettings(context)
     }
 
+    fun openNotificationAccessSettings(context: Context) {
+        NotificationAccessManager.openNotificationAccessSettings(context)
+    }
+
     private fun loadDay(date: LocalDate) {
         viewModelScope.launch {
             _state.update { current ->
@@ -70,6 +80,7 @@ class UsageHistoryViewModel(
                 _state.update { current ->
                     current.copy(
                         hasUsageAccess = false,
+                        hasNotificationAccess = repository.hasNotificationAccess(),
                         isRefreshing = false,
                         sessions = emptyList(),
                     )
@@ -85,6 +96,7 @@ class UsageHistoryViewModel(
                         selectedDate = date,
                         sessions = sessions,
                         hasUsageAccess = true,
+                        hasNotificationAccess = repository.hasNotificationAccess(),
                         isRefreshing = false,
                     )
                 }
@@ -95,6 +107,7 @@ class UsageHistoryViewModel(
                         selectedDate = date,
                         sessions = cached,
                         hasUsageAccess = true,
+                        hasNotificationAccess = repository.hasNotificationAccess(),
                         isRefreshing = false,
                         errorMessage = throwable.message ?: "Failed to read usage history.",
                     )

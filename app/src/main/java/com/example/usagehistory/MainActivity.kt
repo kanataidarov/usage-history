@@ -42,6 +42,9 @@ class MainActivity : ComponentActivity() {
                 val onOpenSettings = remember(viewModel) {
                     { viewModel.openUsageAccessSettings(activity) }
                 }
+                val onOpenNotificationSettings = remember(viewModel) {
+                    { viewModel.openNotificationAccessSettings(activity) }
+                }
 
                 LifecycleResumeEffect(Unit) {
                     viewModel.onResume()
@@ -52,6 +55,8 @@ class MainActivity : ComponentActivity() {
                     UsageAccessScreen(
                         isChecking = state.isRefreshing,
                         onGrantAccessClick = onOpenSettings,
+                        hasNotificationAccess = state.hasNotificationAccess,
+                        onGrantNotificationAccessClick = onOpenNotificationSettings,
                         onRefreshClick = viewModel::refreshCurrentDay,
                     )
                 } else {
@@ -60,6 +65,7 @@ class MainActivity : ComponentActivity() {
                         onRefresh = viewModel::refreshCurrentDay,
                         onPreviousDay = viewModel::showPreviousDay,
                         onNextDay = viewModel::showNextDay,
+                        onGrantNotificationAccessClick = onOpenNotificationSettings,
                     )
                 }
             }

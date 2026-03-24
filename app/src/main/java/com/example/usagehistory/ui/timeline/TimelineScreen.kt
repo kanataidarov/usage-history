@@ -6,8 +6,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -25,6 +27,7 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledIconButton
@@ -62,6 +65,7 @@ fun TimelineScreen(
     onRefresh: () -> Unit,
     onPreviousDay: () -> Unit,
     onNextDay: () -> Unit,
+    onGrantNotificationAccessClick: () -> Unit,
 ) {
     Scaffold(
         containerColor = TimelineBackground,
@@ -99,6 +103,9 @@ fun TimelineScreen(
             )
             state.errorMessage?.let { errorMessage ->
                 ErrorBanner(errorMessage)
+            }
+            if (!state.hasNotificationAccess) {
+                NotificationAccessBanner(onGrantNotificationAccessClick)
             }
             if (state.isRefreshing && state.sessions.isEmpty()) {
                 Box(
@@ -181,6 +188,35 @@ private fun ErrorBanner(errorMessage: String) {
 }
 
 @Composable
+private fun NotificationAccessBanner(onGrantNotificationAccessClick: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 12.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Text(
+                text = "Enable YouTube video tracking",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSecondaryContainer,
+            )
+            Text(
+                text = "Turn on Notification Access to replace generic YouTube app opens with video titles and watch-session stop times from now on.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSecondaryContainer,
+            )
+            Button(onClick = onGrantNotificationAccessClick) {
+                Text("Enable notification access")
+            }
+        }
+    }
+}
+
+@Composable
 private fun EmptyState() {
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -235,6 +271,7 @@ private fun TimelineSessionRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .height(IntrinsicSize.Min)
             .background(Color.Transparent)
             .padding(bottom = 2.dp),
         verticalAlignment = Alignment.Top,
@@ -274,7 +311,7 @@ private fun TimelineSessionRow(
                         .padding(start = 12.dp),
                 ) {
                     Text(
-                        text = session.appLabel,
+                        text = session.contentTitle ?: session.appLabel,
                         style = MaterialTheme.typography.titleMedium,
                     )
                     Spacer(modifier = Modifier.height(2.dp))
@@ -293,6 +330,7 @@ private fun TimelineSessionRow(
 private fun TimelineMarker(showConnector: Boolean) {
     Column(
         modifier = Modifier
+            .fillMaxHeight()
             .padding(horizontal = 10.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -313,7 +351,7 @@ private fun TimelineMarker(showConnector: Boolean) {
             Box(
                 modifier = Modifier
                     .width(4.dp)
-                    .height(68.dp)
+                    .weight(1f)
                     .background(TimelineAccent),
             )
         }
@@ -359,7 +397,7 @@ private fun AppIcon(
 }
 
 private fun formatClockTime(epochMillis: Long): String {
-    val formatter = DateTimeFormatter.ofPattern("HH:mm", Locale.getDefault())
+    val formatter = DateTimeFormatter.ofPattern("HH:mm:ss", Locale.getDefault())
     return Instant.ofEpochMilli(epochMillis)
         .atZone(ZoneId.systemDefault())
         .toLocalTime()
