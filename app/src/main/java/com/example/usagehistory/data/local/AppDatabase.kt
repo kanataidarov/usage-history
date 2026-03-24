@@ -9,7 +9,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
     entities = [UsageSessionEntity::class],
-    version = 2,
+    version = 3,
     exportSchema = false,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -25,7 +25,7 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "usage-history.db",
-                ).addMigrations(MIGRATION_1_2)
+                ).addMigrations(MIGRATION_1_2, MIGRATION_2_3)
                     .build()
                     .also { instance = it }
             }
@@ -50,6 +50,30 @@ abstract class AppDatabase : RoomDatabase() {
                         """
                         ALTER TABLE usage_sessions
                         ADD COLUMN contentTitle TEXT
+                        """.trimIndent(),
+                    )
+                }
+            }
+
+        private val MIGRATION_2_3 =
+            object : Migration(2, 3) {
+                override fun migrate(db: SupportSQLiteDatabase) {
+                    db.execSQL(
+                        """
+                        ALTER TABLE usage_sessions
+                        ADD COLUMN contentKey TEXT
+                        """.trimIndent(),
+                    )
+                    db.execSQL(
+                        """
+                        ALTER TABLE usage_sessions
+                        ADD COLUMN notificationPostedAtEpochMillis INTEGER
+                        """.trimIndent(),
+                    )
+                    db.execSQL(
+                        """
+                        ALTER TABLE usage_sessions
+                        ADD COLUMN readInferredAtEpochMillis INTEGER
                         """.trimIndent(),
                     )
                 }

@@ -1,4 +1,4 @@
 <resources>
     <string name="app_name">Usage History</string>
-    <string name="youtube_tracking_service_label">YouTube video tracking</string>
+    <string name="youtube_tracking_service_label">Notification-based tracking</string>
 </resources>

@@ -63,9 +63,9 @@ fun UsageAccessScreen(
                 )
                 Text(
                     text = if (hasNotificationAccess) {
-                        "YouTube video detail tracking is enabled."
+                        "Notification-based YouTube and WhatsApp tracking is enabled."
                     } else {
-                        "Optional: enable Notification Access to replace generic YouTube app opens with video titles and exact watch-session times going forward."
+                        "Optional: enable Notification Access to add YouTube video titles and infer WhatsApp message read times going forward."
                     },
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -89,7 +89,7 @@ fun UsageAccessScreen(
                     modifier = Modifier.fillMaxWidth(),
                     onClick = onGrantNotificationAccessClick,
                 ) {
-                    Text(if (hasNotificationAccess) "Notification access enabled" else "Enable YouTube detail tracking")
+                    Text(if (hasNotificationAccess) "Notification access enabled" else "Enable notification-based tracking")
                 }
 
                 if (isChecking) {

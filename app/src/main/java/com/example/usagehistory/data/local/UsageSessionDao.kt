@@ -12,7 +12,11 @@ interface UsageSessionDao {
         """
         SELECT * FROM usage_sessions
         WHERE dayStartEpochMillis = :dayStartEpochMillis
-        ORDER BY startedAtEpochMillis DESC
+        AND (
+            contentType != '${UsageSessionEntity.CONTENT_TYPE_WHATSAPP_MESSAGE}'
+            OR readInferredAtEpochMillis IS NOT NULL
+        )
+        ORDER BY startedAtEpochMillis DESC, notificationPostedAtEpochMillis DESC
         """,
     )
     suspend fun getSessionsForDay(dayStartEpochMillis: Long): List<UsageSessionEntity>
@@ -44,6 +48,22 @@ interface UsageSessionDao {
         dayStartEpochMillis: Long,
         sessionSource: String,
         packageName: String,
+    ): List<UsageSessionEntity>
+
+    @Query(
+        """
+        SELECT * FROM usage_sessions
+        WHERE contentType = '${UsageSessionEntity.CONTENT_TYPE_WHATSAPP_MESSAGE}'
+        AND packageName = :packageName
+        AND readInferredAtEpochMillis IS NULL
+        AND notificationPostedAtEpochMillis IS NOT NULL
+        AND notificationPostedAtEpochMillis < :beforeEpochMillis
+        ORDER BY notificationPostedAtEpochMillis ASC
+        """,
+    )
+    suspend fun getPendingMessageSessionsBefore(
+        packageName: String,
+        beforeEpochMillis: Long,
     ): List<UsageSessionEntity>
 
     @Transaction

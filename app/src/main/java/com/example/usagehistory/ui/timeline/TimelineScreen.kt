@@ -200,12 +200,12 @@ private fun NotificationAccessBanner(onGrantNotificationAccessClick: () -> Unit)
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Text(
-                text = "Enable YouTube video tracking",
+                text = "Enable notification-based tracking",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSecondaryContainer,
             )
             Text(
-                text = "Turn on Notification Access to replace generic YouTube app opens with video titles and watch-session stop times from now on.",
+                text = "Turn on Notification Access to capture YouTube titles and infer WhatsApp message read times from notification + app-open activity.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSecondaryContainer,
             )
@@ -311,12 +311,12 @@ private fun TimelineSessionRow(
                         .padding(start = 12.dp),
                 ) {
                     Text(
-                        text = session.contentTitle ?: session.appLabel,
+                        text = session.displayTitle(),
                         style = MaterialTheme.typography.titleMedium,
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = formatDuration(session.durationMillis),
+                        text = session.displaySubtitle(),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -415,4 +415,26 @@ private fun formatDuration(durationMillis: Long): String {
         if (minutes > 0) add("$minutes min")
         if (seconds > 0 || isEmpty()) add("$seconds sec")
     }.joinToString(" ")
+}
+
+private fun UsageSessionEntity.displayTitle(): String {
+    return when (contentType) {
+        UsageSessionEntity.CONTENT_TYPE_WHATSAPP_MESSAGE -> contentTitle ?: "Incoming WhatsApp message"
+        else -> contentTitle ?: appLabel
+    }
+}
+
+private fun UsageSessionEntity.displaySubtitle(): String {
+    return when (contentType) {
+        UsageSessionEntity.CONTENT_TYPE_WHATSAPP_MESSAGE -> {
+            val postedAt = notificationPostedAtEpochMillis
+            if (postedAt == null) {
+                "Read in WhatsApp"
+            } else {
+                "Received ${formatClockTime(postedAt)}"
+            }
+        }
+
+        else -> formatDuration(durationMillis)
+    }
 }
